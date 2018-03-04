@@ -6,27 +6,154 @@
     <title>Document</title>
     <script src="Scripts/Vue.js"></script>
     <style>
-    .numberItem {
-        width: ;
+    #title:after {
+        content: " ";
+        clear: both;
+        display: block;
+    }
+
+    .cell-row:after{
+        content: " ";
+        clear: both;
+        display: block;
+    }
+
+    .center-block{
+        display: block;
+        margin-left:auto;
+        margin-right:auto;
     }
     </style>
 </head>
 
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <div id="title" class="center-block" style="width:112px;margin-bottom: 5px;">
+            <three-number v-bind="mineCom"></three-number>
+            <smile v-bind="smileCom" style="margin:0 5px"></smile>
+            <three-number v-bind="timerCom"></three-number>
+        </div>
+        <cells-row v-for="item in config.mine.height" v-bind="testCellRowDto"></cells-row>
+    </div>
 </body>
 
 </html>
-<script type="text/x-template" id="numberItem">
-    <div>
+<script type="text/x-template" id="cellsRowTemplate">
+    <div class="cell-row center-block" v-bind:style="'width:' + columnCount * 16 + 'px'">
+        <div v-for="item in columnCount" v-bind:style="'background-position-y:' + contents.indexOf(status) * -16 + 'px'" style="width:16px;height: 16px;background-image: url('Contents/Images/102.bmp');float:left;"></div>
+    </div>
+</script>
+<script type="text/x-template" id="smileTemplate">
+    <div v-bind:style="'background-position-y:' + contents.indexOf(status) * -24 + 'px'" style="width:24px;height: 24px;background: url('Contents/Images/103.bmp');float:left;">
+    </div>
+</script>
+<script type="text/x-template" id="threeNumberTemplate">
+    <div style="margin-top:1px;float: left;">
+        <number-item v-for="item in 3" v-bind:contents="contents" v-bind:char="chars[item - 1]">
+        </number-item>
+        <div style="clear:both;">
+        </div>
+    </div>
+</script>
+<script type="text/x-template" id="numberItemTemplate">
+    <div v-bind:style="'background-position-y:'+contents.indexOf(char) * -23 +'px'" style="width:13px; height: 23px; float:left; background-image: url('Contents/Images/101.bmp');">
     </div>
 </script>
 <script>
 var vm = new Vue({
     el: "#app",
+    data: {
+        config: {
+            charList: {
+                number: ["-", " ", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"],
+                smile: ["mousedown", "sunglasses", "dell", "o", "smile"],
+                cell: ["up-none", "up-flag", "up-?", "down-boom", "down-success", "down-boom", "down-?", "8", "7", "6", "5", "4", "3", "2", "1", "down-none"]
+            },
+            mine: {
+                width: 10,
+                height: 10
+            }
+        },
 
-    compontens: {
+        mine: {
+            count: 0
+        },
 
+        timer: {
+            count: 0
+        },
+
+        smile: {
+            status: "smile"
+        },
+
+        cells: {
+            cellsStatus: [{clicked:false,boom:true
+            }]
+        }
+    },
+    methods: {
+        toThreeNumbers: function(value) {
+            if (isNaN(value)) {
+                return "---";
+            } else {
+                var result = value.toString();
+                while (result.length < 3) {
+                    result = "0" + result;
+                }
+                return result;
+            }
+        }
+    },
+    computed: {
+        mineCom: function() {
+            return {
+                contents: this.config.charList.number,
+                chars: this.toThreeNumbers(this.mine.count)
+            }
+        },
+        timerCom: function() {
+            return {
+                contents: this.config.charList.number,
+                chars: this.toThreeNumbers(this.timer.count)
+            }
+        },
+        smileCom: function() {
+            return {
+                contents: this.config.charList.smile,
+                status: this.smile.status
+            }
+        },
+        testCellRowDto: function() {
+            return {
+                contents: this.config.charList.cell,
+                status: "up-none",
+                columnCount: this.config.mine.width
+            }
+        }
+    },
+    components: {
+        threeNumber: {
+            template: "#threeNumberTemplate",
+            props: ["contents", "chars"],
+            data: function() {
+                return {}
+            },
+            components: {
+                numberItem: {
+                    template: "#numberItemTemplate",
+                    props: ["contents", "char"]
+                }
+            }
+        },
+        smile: {
+            template: "#smileTemplate",
+            props: ["contents", "status"]
+        },
+        cellsRow: {
+            template: "#cellsRowTemplate",
+            props: ["contents", "status", "columnCount"]
+        }
     }
 });
 </script>
